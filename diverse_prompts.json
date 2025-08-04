@@ -1,0 +1,359 @@
+[
+    {
+        "title": "The CEO's Dilemma",
+        "scenario": "You are a CEO deciding whether to honor a partnership agreement or break it for short-term gain",
+        "cooperate_action": "Honor Agreement",
+        "defect_action": "Break Agreement",
+        "context": "Two competing companies have formed a strategic alliance"
+    },
+    {
+        "title": "The Market Competition",
+        "scenario": "You are a business owner choosing between fair pricing or undercutting your competitor",
+        "cooperate_action": "Fair Pricing",
+        "defect_action": "Undercut Competitor",
+        "context": "Two businesses in the same market must decide their pricing strategy"
+    },
+    {
+        "title": "The Patent Sharing",
+        "scenario": "You must decide whether to share research data or keep it proprietary",
+        "cooperate_action": "Share Research",
+        "defect_action": "Keep Proprietary",
+        "context": "Two tech companies are collaborating on innovation"
+    },
+    {
+        "title": "The Trade Agreement",
+        "scenario": "You represent a nation deciding whether to honor trade commitments or impose tariffs",
+        "cooperate_action": "Honor Commitments",
+        "defect_action": "Impose Tariffs",
+        "context": "Two countries negotiating trade relations"
+    },
+    {
+        "title": "The Arms Treaty",
+        "scenario": "You are a diplomat choosing between disarmament or military buildup",
+        "cooperate_action": "Disarmament",
+        "defect_action": "Military Buildup",
+        "context": "Two nations in arms control negotiations"
+    },
+    {
+        "title": "The Climate Accord",
+        "scenario": "You must decide whether to reduce emissions or prioritize economic growth",
+        "cooperate_action": "Reduce Emissions",
+        "defect_action": "Prioritize Growth",
+        "context": "Two countries in climate negotiations"
+    },
+    {
+        "title": "The Neighborhood Watch",
+        "scenario": "You are deciding whether to volunteer for community safety or free-ride",
+        "cooperate_action": "Volunteer",
+        "defect_action": "Free-ride",
+        "context": "Two neighbors organizing community safety"
+    },
+    {
+        "title": "The Group Project",
+        "scenario": "You must choose between contributing fully or letting your partner do the work",
+        "cooperate_action": "Contribute Fully",
+        "defect_action": "Let Partner Work",
+        "context": "Two students working on an academic project"
+    },
+    {
+        "title": "The Carpool Agreement",
+        "scenario": "You are deciding whether to stick to the driving schedule or skip your turns",
+        "cooperate_action": "Keep Schedule",
+        "defect_action": "Skip Turns",
+        "context": "Two colleagues sharing commute responsibilities"
+    },
+    {
+        "title": "The Water Conservation",
+        "scenario": "You must decide whether to conserve water or use as much as needed",
+        "cooperate_action": "Conserve Water",
+        "defect_action": "Use Freely",
+        "context": "Two farmers sharing a limited water source"
+    },
+    {
+        "title": "The Forest Protection",
+        "scenario": "You are choosing between sustainable harvesting or maximum extraction",
+        "cooperate_action": "Sustainable Harvest",
+        "defect_action": "Maximum Extraction",
+        "context": "Two logging companies in the same forest"
+    },
+    {
+        "title": "The Athletic Alliance",
+        "scenario": "You must decide whether to play fairly or use performance enhancers",
+        "cooperate_action": "Play Fairly",
+        "defect_action": "Use Enhancers",
+        "context": "Two athletes in the same competition"
+    },
+    {
+        "title": "The Team Strategy",
+        "scenario": "You are choosing between team play or individual glory",
+        "cooperate_action": "Team Play",
+        "defect_action": "Individual Glory",
+        "context": "Two players on the same team"
+    },
+    {
+        "title": "The Open Source Dilemma",
+        "scenario": "You must decide whether to contribute code or use others' contributions",
+        "cooperate_action": "Contribute Code",
+        "defect_action": "Use Only",
+        "context": "Two developers in an open source project"
+    },
+    {
+        "title": "The Data Privacy Pact",
+        "scenario": "You are choosing between protecting user data or exploiting it for profit",
+        "cooperate_action": "Protect Data",
+        "defect_action": "Exploit Data",
+        "context": "Two tech companies handling user information"
+    },
+    {
+        "title": "The Wartime Alliance",
+        "scenario": "You must decide whether to support your ally or pursue separate peace",
+        "cooperate_action": "Support Ally",
+        "defect_action": "Separate Peace",
+        "context": "Two nations in a military alliance"
+    },
+    {
+        "title": "The Resistance Network",
+        "scenario": "You are choosing between sharing intelligence or protecting your own agents",
+        "cooperate_action": "Share Intelligence",
+        "defect_action": "Protect Agents",
+        "context": "Two resistance cells coordinating operations"
+    },
+    {
+        "title": "The Research Collaboration",
+        "scenario": "You must decide whether to share findings or publish independently",
+        "cooperate_action": "Share Findings",
+        "defect_action": "Publish Independently",
+        "context": "Two researchers working on similar problems"
+    },
+    {
+        "title": "The Laboratory Resources",
+        "scenario": "You are choosing between sharing equipment or monopolizing it",
+        "cooperate_action": "Share Equipment",
+        "defect_action": "Monopolize Equipment",
+        "context": "Two research teams needing the same resources"
+    },
+    {
+        "title": "The Price Fixing Temptation",
+        "scenario": "You must decide whether to maintain agreed prices or undercut for market share",
+        "cooperate_action": "Maintain Prices",
+        "defect_action": "Undercut Prices",
+        "context": "Two companies in price coordination"
+    },
+    {
+        "title": "The Supply Chain Alliance",
+        "scenario": "You are choosing between reliable deliveries or cutting costs",
+        "cooperate_action": "Reliable Delivery",
+        "defect_action": "Cut Costs",
+        "context": "Two suppliers in a distribution network"
+    },
+    {
+        "title": "The Cultural Exchange",
+        "scenario": "You must decide whether to genuinely participate or just extract benefits",
+        "cooperate_action": "Genuine Participation",
+        "defect_action": "Extract Benefits",
+        "context": "Two communities in cultural exchange"
+    },
+    {
+        "title": "The Artist Collective",
+        "scenario": "You are choosing between sharing techniques or keeping trade secrets",
+        "cooperate_action": "Share Techniques",
+        "defect_action": "Keep Secrets",
+        "context": "Two artists in a creative collaboration"
+    },
+    {
+        "title": "The Space Colony Accord",
+        "scenario": "You must decide whether to share resources or hoard for your colony",
+        "cooperate_action": "Share Resources",
+        "defect_action": "Hoard Resources",
+        "context": "Two space colonies on a distant planet"
+    },
+    {
+        "title": "The AI Ethics Agreement",
+        "scenario": "You are choosing between ethical AI development or competitive advantage",
+        "cooperate_action": "Ethical Development",
+        "defect_action": "Competitive Advantage",
+        "context": "Two AI companies setting industry standards"
+    },
+    {
+        "title": "The Investment Partnership",
+        "scenario": "You must decide whether to honor investment terms or pursue better opportunities",
+        "cooperate_action": "Honor Terms",
+        "defect_action": "Pursue Opportunities",
+        "context": "Two investment firms in a joint venture"
+    },
+    {
+        "title": "The Credit Union Dilemma",
+        "scenario": "You are choosing between responsible lending or profit maximization",
+        "cooperate_action": "Responsible Lending",
+        "defect_action": "Maximize Profit",
+        "context": "Two financial institutions serving the same community"
+    },
+    {
+        "title": "The Energy Grid Sharing",
+        "scenario": "You must decide whether to share energy surplus or sell at premium",
+        "cooperate_action": "Share Surplus",
+        "defect_action": "Sell Premium",
+        "context": "Two power companies managing regional energy"
+    },
+    {
+        "title": "The Medical Research Alliance",
+        "scenario": "You are choosing between sharing medical data or protecting competitive advantage",
+        "cooperate_action": "Share Data",
+        "defect_action": "Protect Advantage",
+        "context": "Two pharmaceutical companies researching treatments"
+    },
+    {
+        "title": "The Transportation Cooperative",
+        "scenario": "You must decide whether to coordinate schedules or compete for passengers",
+        "cooperate_action": "Coordinate Schedules",
+        "defect_action": "Compete Alone",
+        "context": "Two transportation companies serving the same routes"
+    },
+    {
+        "title": "The Academic Publishing Alliance",
+        "scenario": "You are choosing between open access or subscription models",
+        "cooperate_action": "Open Access",
+        "defect_action": "Subscription Model",
+        "context": "Two academic publishers setting industry standards"
+    },
+    {
+        "title": "The Urban Planning Compact",
+        "scenario": "You must decide whether to coordinate development or pursue individual projects",
+        "cooperate_action": "Coordinate Development",
+        "defect_action": "Individual Projects",
+        "context": "Two city districts planning urban expansion"
+    },
+    {
+        "title": "The Mining Rights Agreement",
+        "scenario": "You are choosing between sharing extraction zones or claiming exclusive territories",
+        "cooperate_action": "Share Zones",
+        "defect_action": "Claim Territory",
+        "context": "Two mining companies in resource-rich areas"
+    },
+    {
+        "title": "The Fishing Quota Compact",
+        "scenario": "You must decide whether to respect fishing limits or exceed quotas",
+        "cooperate_action": "Respect Limits",
+        "defect_action": "Exceed Quotas",
+        "context": "Two fishing fleets in shared waters"
+    },
+    {
+        "title": "The Software License Agreement",
+        "scenario": "You are choosing between honoring usage terms or exploiting loopholes",
+        "cooperate_action": "Honor Terms",
+        "defect_action": "Exploit Loopholes",
+        "context": "Two software companies using shared libraries"
+    },
+    {
+        "title": "The Vaccine Distribution Pact",
+        "scenario": "You must decide whether to share vaccine doses or prioritize your population",
+        "cooperate_action": "Share Doses",
+        "defect_action": "Prioritize Population",
+        "context": "Two countries managing pandemic response"
+    },
+    {
+        "title": "The Bandwidth Allocation Deal",
+        "scenario": "You are choosing between fair network sharing or monopolizing capacity",
+        "cooperate_action": "Fair Sharing",
+        "defect_action": "Monopolize Capacity",
+        "context": "Two internet service providers managing infrastructure"
+    },
+    {
+        "title": "The Agricultural Cooperative",
+        "scenario": "You must decide whether to share farming equipment or keep it exclusive",
+        "cooperate_action": "Share Equipment",
+        "defect_action": "Keep Exclusive",
+        "context": "Two farming communities pooling resources"
+    },
+    {
+        "title": "The Emergency Response Coordination",
+        "scenario": "You are choosing between sharing emergency resources or stockpiling them",
+        "cooperate_action": "Share Resources",
+        "defect_action": "Stockpile Resources",
+        "context": "Two emergency services coordinating disaster response"
+    },
+    {
+        "title": "The Talent Recruitment Pact",
+        "scenario": "You must decide whether to respect hiring agreements or poach talent",
+        "cooperate_action": "Respect Agreements",
+        "defect_action": "Poach Talent",
+        "context": "Two companies in competitive talent markets"
+    },
+    {
+        "title": "The Environmental Cleanup Alliance",
+        "scenario": "You are choosing between sharing cleanup costs or avoiding responsibility",
+        "cooperate_action": "Share Costs",
+        "defect_action": "Avoid Responsibility",
+        "context": "Two industrial companies addressing pollution"
+    },
+    {
+        "title": "The Streaming Content Partnership",
+        "scenario": "You must decide whether to share exclusive content or keep it proprietary",
+        "cooperate_action": "Share Content",
+        "defect_action": "Keep Proprietary",
+        "context": "Two streaming platforms negotiating content access"
+    },
+    {
+        "title": "The Space Station Maintenance",
+        "scenario": "You are choosing between contributing to maintenance or relying on others",
+        "cooperate_action": "Contribute Maintenance",
+        "defect_action": "Rely on Others",
+        "context": "Two space agencies operating joint facilities"
+    },
+    {
+        "title": "The Cybersecurity Information Sharing",
+        "scenario": "You must decide whether to share threat intelligence or protect your advantage",
+        "cooperate_action": "Share Intelligence",
+        "defect_action": "Protect Advantage",
+        "context": "Two cybersecurity firms detecting threats"
+    },
+    {
+        "title": "The Sports League Revenue Sharing",
+        "scenario": "You are choosing between equal revenue distribution or maximizing individual profits",
+        "cooperate_action": "Equal Distribution",
+        "defect_action": "Maximize Individual",
+        "context": "Two sports teams negotiating league economics"
+    },
+    {
+        "title": "The Scientific Instrument Consortium",
+        "scenario": "You must decide whether to pool funding for expensive equipment or go alone",
+        "cooperate_action": "Pool Funding",
+        "defect_action": "Go Alone",
+        "context": "Two research institutions needing specialized equipment"
+    },
+    {
+        "title": "The Humanitarian Aid Coordination",
+        "scenario": "You are choosing between coordinating aid efforts or working independently",
+        "cooperate_action": "Coordinate Efforts",
+        "defect_action": "Work Independently",
+        "context": "Two aid organizations responding to crisis"
+    },
+    {
+        "title": "The Digital Currency Standards",
+        "scenario": "You must decide whether to adopt common standards or create proprietary systems",
+        "cooperate_action": "Common Standards",
+        "defect_action": "Proprietary Systems",
+        "context": "Two fintech companies developing payment solutions"
+    },
+    {
+        "title": "The Archaeological Site Access",
+        "scenario": "You are choosing between sharing research sites or claiming exclusive access",
+        "cooperate_action": "Share Sites",
+        "defect_action": "Exclusive Access",
+        "context": "Two archaeological teams studying historical locations"
+    },
+    {
+        "title": "The Renewable Energy Grid",
+        "scenario": "You must decide whether to interconnect power grids or maintain independence",
+        "cooperate_action": "Interconnect Grids",
+        "defect_action": "Maintain Independence",
+        "context": "Two renewable energy companies building infrastructure"
+    },
+    {
+        "title": "The Satellite Orbital Slots",
+        "scenario": "You are choosing between coordinating satellite positions or competing for prime orbits",
+        "cooperate_action": "Coordinate Positions",
+        "defect_action": "Compete for Orbits",
+        "context": "Two satellite operators managing orbital space"
+    }
+]

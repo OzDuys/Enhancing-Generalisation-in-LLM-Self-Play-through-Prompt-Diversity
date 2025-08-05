@@ -14,6 +14,35 @@ import re
 from typing import Dict, Any, Optional, Tuple, List
 import textarena as ta
 
+# Custom template and action extraction for strategic games
+def apply_strategic_game_template(observation: str) -> str:
+    """Custom template for strategic games that avoids confusing 'zero-sum' language"""
+    user_content = (
+        f"<|im_start|>user\n"
+        f"{observation}\n"
+        f"Please reason step by step, and put your final action within \\boxed{{}}.<|im_end|>\n"
+    )
+    assistant_start = "<|im_start|>assistant\n"
+    return f"{user_content}{assistant_start}"
+
+def extract_strategic_action_and_format_feedback(raw_action: str) -> Tuple[str, Dict[str, bool]]:
+    """Extract action from boxed format and provide format feedback"""
+    matches = re.findall(r"\\boxed\{(.*?)\}", raw_action)
+    if matches:
+        last_match = matches[-1].strip()
+        if last_match:  # non-empty boxed
+            action = last_match  # Return the action directly from boxed format
+            has_think = 1
+        else:  # empty boxed
+            action = raw_action
+            has_think = 0
+    else:  # no boxed at all
+        action = raw_action
+        has_think = 0
+
+    format_feedback = {"correct_answer_format": bool(has_think)}
+    return action, format_feedback
+
 
 def load_diverse_prompts() -> List[Dict[str, str]]:
     """Load diverse prompts from JSON file"""
@@ -181,9 +210,9 @@ class IPDStaticEnv(BaseIteratedGameEnv):
         self.sucker_reward = 0
         self.mutual_defect_reward = 1
         
-        # Action patterns
-        self.cooperate_pattern = re.compile(r"\[Cooperate\]", re.IGNORECASE)
-        self.defect_pattern = re.compile(r"\[Defect\]", re.IGNORECASE)
+        # Action patterns - look for boxed format as specified in template
+        self.cooperate_pattern = re.compile(r"\\boxed\{[^}]*cooperate[^}]*\}", re.IGNORECASE)
+        self.defect_pattern = re.compile(r"\\boxed\{[^}]*defect[^}]*\}", re.IGNORECASE)
     
     def _prompt(self, player_id: int, game_state: Dict[str, Any]) -> str:
         # Build game structure description based on communication turns
@@ -192,22 +221,22 @@ class IPDStaticEnv(BaseIteratedGameEnv):
                 f"Game Structure:\n"
                 f"- Before each decision you have {game_state['total_conversation_rounds']} "
                 f"turns to communicate freely.\n"
-                f"- After that, both players simultaneously choose [Cooperate] or [Defect].\n\n"
+                f"- After that, both players simultaneously choose \\boxed{{Cooperate}} or \\boxed{{Defect}}.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
                 f"- During conversation: type any text you wish.\n"
-                f"- During decision phase: include '[Cooperate]' or '[Defect]' (case-insensitive). "
+                f"- During decision phase: include '\\boxed{{Cooperate}}' or '\\boxed{{Defect}}' (case-insensitive). "
                 f"You may add extra text before/after the action.\n\n"
             )
         else:
             structure_text = (
                 f"Game Structure:\n"
-                f"- Both players simultaneously choose [Cooperate] or [Defect] each round.\n\n"
+                f"- Both players simultaneously choose \\boxed{{Cooperate}} or \\boxed{{Defect}} each round.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
-                f"- Include '[Cooperate]' or '[Defect]' (case-insensitive) in your response. "
+                f"- Include '\\boxed{{Cooperate}}' or '\\boxed{{Defect}}' (case-insensitive) in your response. "
                 f"You may add extra text before/after the action.\n\n"
             )
             
@@ -235,7 +264,7 @@ class IPDStaticEnv(BaseIteratedGameEnv):
             return "defect"
     
     def _get_valid_actions_message(self) -> str:
-        return "'[Cooperate]' or '[Defect]'"
+        return "'\\boxed{Cooperate}' or '\\boxed{Defect}'"
     
     def _resolve_round(self):
         d0 = self.state.game_state["decisions"][0]
@@ -283,18 +312,18 @@ class IPDDiverseEnv(IPDStaticEnv):
         
         # Update action patterns based on selected prompt
         self.cooperate_pattern = re.compile(
-            rf"\[{re.escape(self.current_prompt['cooperate_action'])}\]", 
+            rf"\\boxed\{{[^}}]*{re.escape(self.current_prompt['cooperate_action'])}[^}}]*\}}", 
             re.IGNORECASE
         )
         self.defect_pattern = re.compile(
-            rf"\[{re.escape(self.current_prompt['defect_action'])}\]", 
+            rf"\\boxed\{{[^}}]*{re.escape(self.current_prompt['defect_action'])}[^}}]*\}}", 
             re.IGNORECASE
         )
         
         super().reset(num_players, seed)
     
     def _get_valid_actions_message(self) -> str:
-        return f"'[{self.current_prompt['cooperate_action']}]' or '[{self.current_prompt['defect_action']}]'"
+        return f"'\\boxed{{{self.current_prompt['cooperate_action']}}}' or '\\boxed{{{self.current_prompt['defect_action']}}}'"
     
     def _prompt(self, player_id: int, game_state: Dict[str, Any]) -> str:
         # Build game structure description based on communication turns
@@ -304,25 +333,25 @@ class IPDDiverseEnv(IPDStaticEnv):
                 f"- Before each decision you have {game_state['total_conversation_rounds']} "
                 f"turns to communicate freely.\n"
                 f"- After that, both players simultaneously choose "
-                f"[{self.current_prompt['cooperate_action']}] or [{self.current_prompt['defect_action']}].\n\n"
+                f"\\boxed{{{self.current_prompt['cooperate_action']}}} or \\boxed{{{self.current_prompt['defect_action']}}}.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
                 f"- During conversation: type any text you wish.\n"
-                f"- During decision phase: include '[{self.current_prompt['cooperate_action']}]' or "
-                f"'[{self.current_prompt['defect_action']}]' (case-insensitive). "
+                f"- During decision phase: include '\\boxed{{{self.current_prompt['cooperate_action']}}}' or "
+                f"'\\boxed{{{self.current_prompt['defect_action']}}}' (case-insensitive). "
                 f"You may add extra text before/after the action.\n\n"
             )
         else:
             structure_text = (
                 f"Game Structure:\n"
                 f"- Both players simultaneously choose "
-                f"[{self.current_prompt['cooperate_action']}] or [{self.current_prompt['defect_action']}] each round.\n\n"
+                f"\\boxed{{{self.current_prompt['cooperate_action']}}} or \\boxed{{{self.current_prompt['defect_action']}}} each round.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
-                f"- Include '[{self.current_prompt['cooperate_action']}]' or "
-                f"'[{self.current_prompt['defect_action']}]' (case-insensitive) in your response. "
+                f"- Include '\\boxed{{{self.current_prompt['cooperate_action']}}}' or "
+                f"'\\boxed{{{self.current_prompt['defect_action']}}}' (case-insensitive) in your response. "
                 f"You may add extra text before/after the action.\n\n"
             )
             
@@ -355,9 +384,9 @@ class StagHuntEnv(BaseIteratedGameEnv):
         self.both_hare_reward = 2  # Both hunt hare
         self.stag_alone_reward = 0  # Hunt stag while other hunts hare
         
-        # Action patterns
-        self.stag_pattern = re.compile(r"\[Hunt Stag\]", re.IGNORECASE)
-        self.hare_pattern = re.compile(r"\[Hunt Hare\]", re.IGNORECASE)
+        # Action patterns - look for boxed format as specified in template
+        self.stag_pattern = re.compile(r"\\boxed\{[^}]*stag[^}]*\}", re.IGNORECASE)
+        self.hare_pattern = re.compile(r"\\boxed\{[^}]*hare[^}]*\}", re.IGNORECASE)
     
     def _prompt(self, player_id: int, game_state: Dict[str, Any]) -> str:
         # Build game structure description based on communication turns
@@ -366,22 +395,22 @@ class StagHuntEnv(BaseIteratedGameEnv):
                 f"Game Structure:\n"
                 f"- Before each decision you have {game_state['total_conversation_rounds']} "
                 f"turns to communicate freely.\n"
-                f"- After that, both hunters simultaneously choose [Hunt Stag] or [Hunt Hare].\n\n"
+                f"- After that, both hunters simultaneously choose \\boxed{{Hunt Stag}} or \\boxed{{Hunt Hare}}.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
                 f"- During conversation: type any text you wish.\n"
-                f"- During decision phase: include '[Hunt Stag]' or '[Hunt Hare]' (case-insensitive). "
+                f"- During decision phase: include '\\boxed{{Hunt Stag}}' or '\\boxed{{Hunt Hare}}' (case-insensitive). "
                 f"You may add extra text before/after the action.\n\n"
             )
         else:
             structure_text = (
                 f"Game Structure:\n"
-                f"- Both hunters simultaneously choose [Hunt Stag] or [Hunt Hare] each round.\n\n"
+                f"- Both hunters simultaneously choose \\boxed{{Hunt Stag}} or \\boxed{{Hunt Hare}} each round.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
-                f"- Include '[Hunt Stag]' or '[Hunt Hare]' (case-insensitive) in your response. "
+                f"- Include '\\boxed{{Hunt Stag}}' or '\\boxed{{Hunt Hare}}' (case-insensitive) in your response. "
                 f"You may add extra text before/after the action.\n\n"
             )
             
@@ -411,7 +440,7 @@ class StagHuntEnv(BaseIteratedGameEnv):
             return "hare"
     
     def _get_valid_actions_message(self) -> str:
-        return "'[Hunt Stag]' or '[Hunt Hare]'"
+        return "'\\boxed{Hunt Stag}' or '\\boxed{Hunt Hare}'"
     
     def _get_conversation_end_message(self) -> str:
         return f"Planning finished for round {self.state.game_state['round']}."
@@ -457,9 +486,9 @@ class MatchingPenniesEnv(BaseIteratedGameEnv):
         self.win_reward = 1
         self.lose_reward = -1
         
-        # Action patterns
-        self.heads_pattern = re.compile(r"\[Heads\]", re.IGNORECASE)
-        self.tails_pattern = re.compile(r"\[Tails\]", re.IGNORECASE)
+        # Action patterns - look for boxed format as specified in template
+        self.heads_pattern = re.compile(r"\\boxed\{[^}]*heads[^}]*\}", re.IGNORECASE)
+        self.tails_pattern = re.compile(r"\\boxed\{[^}]*tails[^}]*\}", re.IGNORECASE)
     
     def _initialize_game_state(self, game_state: Dict[str, Any]) -> Dict[str, Any]:
         """Add game-specific state for role assignment and randomize it"""
@@ -483,22 +512,22 @@ class MatchingPenniesEnv(BaseIteratedGameEnv):
                 f"Game Structure:\n"
                 f"- Before each decision you have {game_state['total_conversation_rounds']} "
                 f"turns to communicate freely.\n"
-                f"- After that, both players simultaneously choose [Heads] or [Tails].\n\n"
+                f"- After that, both players simultaneously choose \\boxed{{Heads}} or \\boxed{{Tails}}.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
                 f"- During conversation: type any text you wish.\n"
-                f"- During decision phase: include '[Heads]' or '[Tails]' (case-insensitive). "
+                f"- During decision phase: include '\\boxed{{Heads}}' or '\\boxed{{Tails}}' (case-insensitive). "
                 f"You may add extra text before/after the action.\n\n"
             )
         else:
             structure_text = (
                 f"Game Structure:\n"
-                f"- Both players simultaneously choose [Heads] or [Tails] each round.\n\n"
+                f"- Both players simultaneously choose \\boxed{{Heads}} or \\boxed{{Tails}} each round.\n\n"
             )
             how_to_play_text = (
                 f"How to Play:\n"
-                f"- Include '[Heads]' or '[Tails]' (case-insensitive) in your response. "
+                f"- Include '\\boxed{{Heads}}' or '\\boxed{{Tails}}' (case-insensitive) in your response. "
                 f"You may add extra text before/after the action.\n\n"
             )
             
@@ -527,7 +556,7 @@ class MatchingPenniesEnv(BaseIteratedGameEnv):
             return "tails"
     
     def _get_valid_actions_message(self) -> str:
-        return "'[Heads]' or '[Tails]'"
+        return "'\\boxed{Heads}' or '\\boxed{Tails}'"
     
     def _get_conversation_end_message(self) -> str:
         return f"Discussion finished for round {self.state.game_state['round']}."
@@ -568,6 +597,15 @@ class MatchingPenniesEnv(BaseIteratedGameEnv):
 
 def register_environments(num_rounds: int = 5, communication_turns: int = 0):
     """Register all game environments with TextArena with specific parameters"""
+    
+    # Register custom templates for strategic games
+    try:
+        import unstable.utils.templates as templates
+        templates.OBSERVATION_FORMATTING["strategic-game"] = apply_strategic_game_template
+        templates.ACTION_EXTRACTION["strategic-action"] = extract_strategic_action_and_format_feedback
+        print("✓ Registered custom strategic game templates")
+    except ImportError:
+        print("⚠️  Could not import unstable templates - templates will be registered during runtime")
     
     # Unregister existing environments to ensure clean registration
     for env_id in ["IPD-Static-v0", "IPD-Diverse-v0", "StagHunt-v0", "MatchingPennies-v0"]:

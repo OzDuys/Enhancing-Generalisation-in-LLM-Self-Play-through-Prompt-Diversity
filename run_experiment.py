@@ -10,8 +10,8 @@ import ray
 import unstable
 import unstable.reward_transformations as retra
 
-# Import the game environments
-from create_games import register_environments, IPDStaticEnv
+# Import the game environments and custom templates
+from create_games import register_environments, IPDStaticEnv, apply_strategic_game_template, extract_strategic_action_and_format_feedback
 
 # Default configuration - can be overridden with command line arguments
 DEFAULT_CONFIG = {
@@ -19,8 +19,8 @@ DEFAULT_CONFIG = {
     "env_id": "IPD-Static-v0",
     "num_rounds": 5,
     "communication_turns": 0,  # Critical: no conversation as specified
-    "max_train_seq_len": 3000,
-    "max_generation_length": 4096,
+    "max_train_seq_len": None,
+    "max_generation_length": 1024,
     "batch_size": 384,
     "mini_batch_size": 1,
     "learning_rate": 1e-5,
@@ -30,76 +30,6 @@ DEFAULT_CONFIG = {
     "num_eval_workers": 16,
     "wandb_project": "IPD-PromptDiversity"
 }
-
-def get_args():
-    """Parse command line arguments for the experiment."""
-    parser = argparse.ArgumentParser(description="Run IPD Prompt Diversity Experiment")
-    
-    parser.add_argument(
-        "--env-id", 
-        type=str, 
-        default=DEFAULT_CONFIG["env_id"], 
-        choices=["IPD-Static-v0", "IPD-Diverse-v0", "StagHunt-v0", "MatchingPennies-v0"],
-        help="Environment to train on"
-    )
-    
-    parser.add_argument(
-        "--num-rounds",
-        type=int,
-        default=DEFAULT_CONFIG["num_rounds"],
-        help="Number of game rounds per episode"
-    )
-    
-    parser.add_argument(
-        "--communication-turns",
-        type=int, 
-        default=DEFAULT_CONFIG["communication_turns"],
-        help="Number of communication turns before decisions (0 = no conversation)"
-    )
-    
-    parser.add_argument(
-        "--learning-steps",
-        type=int,
-        default=DEFAULT_CONFIG["learning_steps"], 
-        help="Number of learning iterations to run"
-    )
-    
-    parser.add_argument(
-        "--batch-size",
-        type=int,
-        default=DEFAULT_CONFIG["batch_size"],
-        help="Training batch size"
-    )
-    
-    parser.add_argument(
-        "--learning-rate",
-        type=float,
-        default=DEFAULT_CONFIG["learning_rate"],
-        help="Learning rate for training"
-    )
-    
-    parser.add_argument(
-        "--num-train-workers", 
-        type=int,
-        default=DEFAULT_CONFIG["num_train_workers"],
-        help="Number of parallel training workers"
-    )
-    
-    parser.add_argument(
-        "--num-eval-workers",
-        type=int, 
-        default=DEFAULT_CONFIG["num_eval_workers"],
-        help="Number of parallel evaluation workers"
-    )
-    
-    parser.add_argument(
-        "--wandb-project",
-        type=str,
-        default=DEFAULT_CONFIG["wandb_project"],
-        help="Weights & Biases project name"
-    )
-    
-    return parser.parse_args()
 
 def create_config(args):
     """Create configuration dictionary from args and defaults."""
@@ -126,21 +56,6 @@ def main():
     args = get_args()
     config = create_config(args)
     
-    # Print experiment configuration
-    print("=" * 60)
-    print("IPD PROMPT DIVERSITY EXPERIMENT")
-    print("=" * 60)
-    print(f"Environment: {config['env_id']}")
-    print(f"Model: {config['model_name']}")
-    print(f"Game rounds: {config['num_rounds']}")
-    print(f"Communication turns: {config['communication_turns']}")
-    print(f"Training workers: {config['num_train_workers']}")
-    print(f"Evaluation workers: {config['num_eval_workers']}")
-    print(f"Learning steps: {config['learning_steps']}")
-    print(f"Batch size: {config['batch_size']}")
-    print(f"Learning rate: {config['learning_rate']}")
-    print("=" * 60)
-    
     # LoRA configuration for efficient fine-tuning
     lora_config = {
         "lora_rank": 32, 
@@ -152,16 +67,26 @@ def main():
     # vLLM configuration for inference
     vllm_config = {
         "model_name": config["model_name"], 
-        "temperature": 0.6, 
+        "temperature": 0.7, 
         "max_tokens": config["max_generation_length"],
         "max_parallel_seq": 128, 
-        "max_loras": 8, 
+        "max_loras": 16, 
         "lora_config": lora_config,
-        "max_model_len": 8192
+        "max_model_len": 1536,
+        "gpu_memory_utilization": 0.8,
     }
     
     # Initialize Ray for distributed computing
     ray.init(namespace="unstable")
+    
+    # Register custom template to avoid confusing prompts
+    try:
+        import unstable.utils.templates as templates
+        templates.OBSERVATION_FORMATTING["strategic-game"] = apply_strategic_game_template
+        templates.ACTION_EXTRACTION["strategic-action"] = extract_strategic_action_and_format_feedback
+        print("✓ Registered custom strategic game templates in run_experiment.py")
+    except ImportError:
+        print("⚠️  Could not import unstable templates in run_experiment.py - will be registered during environment setup")
     
     # CRITICAL FIX: Register environments with experiment-specific parameters
     print("Registering custom game environments with experiment-specific parameters...")
@@ -177,14 +102,16 @@ def main():
                 env_id=config["env_id"], 
                 num_players=2, 
                 num_actors=2,  # Mirror self-play (num_players == num_actors)
-                prompt_template="qwen3-zs"
+                prompt_template="strategic-game",
+                action_extraction_fn="strategic-action"
             ),
         ],
         eval_env_specs=[
             unstable.EvalEnvSpec(
                 env_id=config["env_id"], 
                 num_players=2, 
-                prompt_template="qwen3-zs"
+                prompt_template="strategic-game",
+                action_extraction_fn="strategic-action"
             ),
         ]
     )
@@ -287,6 +214,76 @@ def main():
         ray.kill(collector, no_restart=True)
         ray.shutdown()
         print("Resources cleaned up.")
+
+def get_args():
+    """Parse command line arguments for the experiment."""
+    parser = argparse.ArgumentParser(description="Run IPD Prompt Diversity Experiment")
+    
+    parser.add_argument(
+        "--env-id", 
+        type=str, 
+        default=DEFAULT_CONFIG["env_id"], 
+        choices=["IPD-Static-v0", "IPD-Diverse-v0", "StagHunt-v0", "MatchingPennies-v0"],
+        help="Environment to train on"
+    )
+    
+    parser.add_argument(
+        "--num-rounds",
+        type=int,
+        default=DEFAULT_CONFIG["num_rounds"],
+        help="Number of game rounds per episode"
+    )
+    
+    parser.add_argument(
+        "--communication-turns",
+        type=int, 
+        default=DEFAULT_CONFIG["communication_turns"],
+        help="Number of communication turns before decisions (0 = no conversation)"
+    )
+    
+    parser.add_argument(
+        "--learning-steps",
+        type=int,
+        default=DEFAULT_CONFIG["learning_steps"], 
+        help="Number of learning iterations to run"
+    )
+    
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_CONFIG["batch_size"],
+        help="Training batch size"
+    )
+    
+    parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=DEFAULT_CONFIG["learning_rate"],
+        help="Learning rate for training"
+    )
+    
+    parser.add_argument(
+        "--num-train-workers", 
+        type=int,
+        default=DEFAULT_CONFIG["num_train_workers"],
+        help="Number of parallel training workers"
+    )
+    
+    parser.add_argument(
+        "--num-eval-workers",
+        type=int, 
+        default=DEFAULT_CONFIG["num_eval_workers"],
+        help="Number of parallel evaluation workers"
+    )
+    
+    parser.add_argument(
+        "--wandb-project",
+        type=str,
+        default=DEFAULT_CONFIG["wandb_project"],
+        help="Weights & Biases project name"
+    )
+    
+    return parser.parse_args()
 
 if __name__ == "__main__":
     main()

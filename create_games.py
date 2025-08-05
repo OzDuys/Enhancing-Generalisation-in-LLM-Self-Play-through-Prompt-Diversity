@@ -210,9 +210,9 @@ class IPDStaticEnv(BaseIteratedGameEnv):
         self.sucker_reward = 0
         self.mutual_defect_reward = 1
         
-        # Action patterns - look for boxed format as specified in template
-        self.cooperate_pattern = re.compile(r"\\boxed\{[^}]*cooperate[^}]*\}", re.IGNORECASE)
-        self.defect_pattern = re.compile(r"\\boxed\{[^}]*defect[^}]*\}", re.IGNORECASE)
+        # Action patterns - match simple action words (boxed wrapper already removed by extraction)
+        self.cooperate_pattern = re.compile(r"cooperate", re.IGNORECASE)
+        self.defect_pattern = re.compile(r"defect", re.IGNORECASE)
     
     def _prompt(self, player_id: int, game_state: Dict[str, Any]) -> str:
         # Build game structure description based on communication turns
@@ -312,11 +312,11 @@ class IPDDiverseEnv(IPDStaticEnv):
         
         # Update action patterns based on selected prompt
         self.cooperate_pattern = re.compile(
-            rf"\\boxed\{{[^}}]*{re.escape(self.current_prompt['cooperate_action'])}[^}}]*\}}", 
+            rf"{re.escape(self.current_prompt['cooperate_action'])}", 
             re.IGNORECASE
         )
         self.defect_pattern = re.compile(
-            rf"\\boxed\{{[^}}]*{re.escape(self.current_prompt['defect_action'])}[^}}]*\}}", 
+            rf"{re.escape(self.current_prompt['defect_action'])}", 
             re.IGNORECASE
         )
         
@@ -384,9 +384,9 @@ class StagHuntEnv(BaseIteratedGameEnv):
         self.both_hare_reward = 2  # Both hunt hare
         self.stag_alone_reward = 0  # Hunt stag while other hunts hare
         
-        # Action patterns - look for boxed format as specified in template
-        self.stag_pattern = re.compile(r"\\boxed\{[^}]*stag[^}]*\}", re.IGNORECASE)
-        self.hare_pattern = re.compile(r"\\boxed\{[^}]*hare[^}]*\}", re.IGNORECASE)
+        # Action patterns - match simple action words (boxed wrapper already removed by extraction)
+        self.stag_pattern = re.compile(r"stag", re.IGNORECASE)
+        self.hare_pattern = re.compile(r"hare", re.IGNORECASE)
     
     def _prompt(self, player_id: int, game_state: Dict[str, Any]) -> str:
         # Build game structure description based on communication turns
@@ -486,9 +486,9 @@ class MatchingPenniesEnv(BaseIteratedGameEnv):
         self.win_reward = 1
         self.lose_reward = -1
         
-        # Action patterns - look for boxed format as specified in template
-        self.heads_pattern = re.compile(r"\\boxed\{[^}]*heads[^}]*\}", re.IGNORECASE)
-        self.tails_pattern = re.compile(r"\\boxed\{[^}]*tails[^}]*\}", re.IGNORECASE)
+        # Action patterns - match simple action words (boxed wrapper already removed by extraction)
+        self.heads_pattern = re.compile(r"heads", re.IGNORECASE)
+        self.tails_pattern = re.compile(r"tails", re.IGNORECASE)
     
     def _initialize_game_state(self, game_state: Dict[str, Any]) -> Dict[str, Any]:
         """Add game-specific state for role assignment and randomize it"""

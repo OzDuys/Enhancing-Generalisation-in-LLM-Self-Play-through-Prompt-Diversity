@@ -27,9 +27,11 @@ DEFAULT_CONFIG = {
     "learning_rate": 1e-5,
     "grad_clip": 0.2,
     "learning_steps": 200,
-    "num_train_workers": 384,
+    "num_train_workers": 128,
     "num_eval_workers": 16,
-    "wandb_project": "IPD-PromptDiversity"
+    "wandb_project": "IPD-PromptDiversity",
+    "num_actor_gpus": 7,  # Number of GPUs for actors (inference)
+    "num_learner_gpus": 1  # Number of GPUs for learner (training)
 }
 
 def create_config(args):
@@ -48,6 +50,8 @@ def create_config(args):
         "num_train_workers": args.num_train_workers,
         "num_eval_workers": args.num_eval_workers,
         "wandb_project": args.wandb_project,
+        "num_actor_gpus": args.num_actor_gpus,
+        "num_learner_gpus": args.num_learner_gpus,
     })
     
     return config
@@ -71,16 +75,16 @@ def main():
         "model_name": config["model_name"], 
         "temperature": 0.7, 
         "max_tokens": config["max_generation_length"],
-        "max_parallel_seq": 128, 
+        "max_parallel_seq": 64, 
         "max_loras": 16, 
         "lora_config": lora_config,
-        "max_model_len": 1536,
+        "max_model_len": 2048,
         "gpu_memory_utilization": 0.8,
     }
     
-    # Initialize Ray for distributed computing
-    ray.init(namespace="unstable")
-    
+    # Initialize Ray for distributed computing with specified GPUs
+    ray.init(namespace="unstable", num_gpus=config["num_actor_gpus"])
+
     # Register custom template to avoid confusing prompts
     try:
         import unstable.utils.templates as templates
@@ -114,7 +118,6 @@ def main():
                 num_players=2, 
                 prompt_template="strategic-game",
                 action_extraction_fn="strategic-action",
-                fixed_opponent="google/gemini-2.0-flash-lite-001",
             ),
         ]
     )
@@ -169,7 +172,7 @@ def main():
     )
     
     # Initialize REINFORCE learner
-    learner = unstable.REINFORCELearner.options(num_gpus=1, name="Learner").remote(
+    learner = unstable.REINFORCELearner.options(num_gpus=config["num_learner_gpus"], name="Learner").remote(
         model_name=config["model_name"],
         lora_cfg=lora_config,
         batch_size=config["batch_size"],
@@ -292,6 +295,20 @@ def get_args():
         type=str,
         default=DEFAULT_CONFIG["wandb_project"],
         help="Weights & Biases project name"
+    )
+    
+    parser.add_argument(
+        "--num-actor-gpus",
+        type=int,
+        default=DEFAULT_CONFIG["num_actor_gpus"],
+        help="Number of GPUs for actors (inference)"
+    )
+    
+    parser.add_argument(
+        "--num-learner-gpus",
+        type=int,
+        default=DEFAULT_CONFIG["num_learner_gpus"],
+        help="Number of GPUs for learner (training)"
     )
     
     return parser.parse_args()

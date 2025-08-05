@@ -52,6 +52,8 @@ def create_config(args):
         "wandb_project": args.wandb_project,
         "num_actor_gpus": args.num_actor_gpus,
         "num_learner_gpus": args.num_learner_gpus,
+        "enforce_eager": args.enforce_eager,
+        "ray_workers_use_nsight": args.ray_workers_use_nsight,
     })
     
     return config
@@ -80,10 +82,13 @@ def main():
         "lora_config": lora_config,
         "max_model_len": 2048,
         "gpu_memory_utilization": 0.8,
+        "enforce_eager": config.get("enforce_eager", True),  # Set to True for debugging/profiling
+        "ray_workers_use_nsight": config.get("ray_workers_use_nsight", False),  # Enable Nsight profiling
     }
     
     # Initialize Ray for distributed computing with specified GPUs
-    ray.init(namespace="unstable", num_gpus=config["num_actor_gpus"])
+    total_gpus = config["num_actor_gpus"] + config["num_learner_gpus"]
+    ray.init(namespace="unstable", num_gpus=total_gpus)
 
     # Register custom template to avoid confusing prompts
     try:
@@ -194,8 +199,6 @@ def main():
     ))
     
     print(f"\nStarting training...")
-    print(f"Monitor progress at: https://wandb.ai (project: {config['wandb_project']})")
-    print(f"Use 'unstable-terminal' in another terminal for real-time monitoring")
     
     try:
         # Start data collection
@@ -295,6 +298,20 @@ def get_args():
         type=str,
         default=DEFAULT_CONFIG["wandb_project"],
         help="Weights & Biases project name"
+    )
+    
+    parser.add_argument(
+        "--enforce-eager",
+        action="store_true",
+        default=False,
+        help="Enable eager execution mode for vLLM (useful for debugging/profiling)"
+    )
+    
+    parser.add_argument(
+        "--ray-workers-use-nsight",
+        action="store_true", 
+        default=False,
+        help="Enable Nsight profiling for Ray workers in vLLM"
     )
     
     parser.add_argument(

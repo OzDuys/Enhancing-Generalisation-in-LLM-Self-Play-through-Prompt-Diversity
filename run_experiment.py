@@ -17,6 +17,7 @@ from create_games import register_environments, IPDStaticEnv, apply_strategic_ga
 DEFAULT_CONFIG = {
     "model_name": "Qwen/Qwen3-1.7B-Base",
     "env_id": "IPD-Static-v0",
+    "eval_env_id": "IPD-Static-v0",  # Separate eval environment for fair comparison
     "num_rounds": 5,
     "communication_turns": 0,  # Critical: no conversation as specified
     "max_train_seq_len": None,
@@ -38,6 +39,7 @@ def create_config(args):
     # Update with command line arguments
     config.update({
         "env_id": args.env_id,
+        "eval_env_id": args.eval_env_id,
         "num_rounds": args.num_rounds,
         "communication_turns": args.communication_turns,
         "learning_steps": args.learning_steps,
@@ -108,10 +110,11 @@ def main():
         ],
         eval_env_specs=[
             unstable.EvalEnvSpec(
-                env_id=config["env_id"], 
+                env_id=config["eval_env_id"], 
                 num_players=2, 
                 prompt_template="strategic-game",
-                action_extraction_fn="strategic-action"
+                action_extraction_fn="strategic-action",
+                fixed_opponent="google/gemini-2.0-flash-lite-001",
             ),
         ]
     )
@@ -225,6 +228,14 @@ def get_args():
         default=DEFAULT_CONFIG["env_id"], 
         choices=["IPD-Static-v0", "IPD-Diverse-v0", "StagHunt-v0", "MatchingPennies-v0"],
         help="Environment to train on"
+    )
+    
+    parser.add_argument(
+        "--eval-env-id", 
+        type=str, 
+        default=DEFAULT_CONFIG["eval_env_id"], 
+        choices=["IPD-Static-v0", "IPD-Diverse-v0", "StagHunt-v0", "MatchingPennies-v0"],
+        help="Environment to evaluate on"
     )
     
     parser.add_argument(
